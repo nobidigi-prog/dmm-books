@@ -299,7 +299,11 @@
           const seriesItems = data.series?.result?.items || [];
 
           // シリーズカードは seriesItems を優先
-          renderSeriesCards(seriesItems.length > 0 ? seriesItems : normalItems);
+          if (seriesItems && seriesItems.length > 0) {
+    renderSeriesCards(seriesItems);
+} else {
+    renderSeriesCards(normalItems);
+}
 
           // 一覧は normalItems
           renderSearchResults(normalItems);
