@@ -20,8 +20,42 @@ if (!seriesId) {
 
 async function loadSeries(id) {
   try {
-    // ★ ① series_id でそのままシリーズ一覧を取得（再検索しない）
-    const apiUrl = `https://dmm-api.nobidigi.workers.dev/?series_id=${id}`;
+    // ① series_id で検索（シリーズ名を取得）
+    const firstUrl = `https://dmm-api.nobidigi.workers.dev/?series_id=${id}`;
+    const firstRes = await fetch(firstUrl, { cache: "no-store" });
+    const firstData = await firstRes.json();
+
+    if (!firstData?.result?.items?.length) {
+      document.getElementById("book-list").innerText = "シリーズ情報が取得できませんでした。";
+      return;
+    }
+
+    // ② シリーズ名候補を抽出（多数決）
+    const itemsForName = firstData.result.items;
+
+    const nameCandidates = itemsForName
+      .map(item =>
+        item.series_name ||
+        item.iteminfo?.series?.[0]?.name
+      )
+      .filter(Boolean);
+
+    const seriesName = nameCandidates
+      .sort((a, b) =>
+        nameCandidates.filter(v => v === a).length -
+        nameCandidates.filter(v => v === b).length
+      )
+      .pop();
+
+    if (!seriesName) {
+      document.getElementById("book-list").innerText = "シリーズ名が取得できませんでした。";
+      return;
+    }
+
+    // ③ シリーズ名の「完全一致検索」
+    const exactKeyword = `^${seriesName}$`;
+    const apiUrl = `https://dmm-api.nobidigi.workers.dev/?keyword=${encodeURIComponent(exactKeyword)}`;
+
     const res = await fetch(apiUrl, { cache: "no-store" });
     const data = await res.json();
 
@@ -34,7 +68,7 @@ async function loadSeries(id) {
     const container = document.getElementById("book-list");
     container.innerHTML = "";
 
-    // ② シリーズ一覧を描画
+    // ④ シリーズ一覧を描画
     items.forEach(item => {
       const title = item.title || "タイトル不明";
       const image = item.imageURL?.large || item.imageURL?.small || "";
