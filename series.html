@@ -40,15 +40,26 @@
 
   <script>
     const params = new URLSearchParams(location.search);
-    const seriesName = params.get("name");
+    const seriesId = params.get("id");
 
-    document.getElementById("seriesTitle").textContent = seriesName;
-
-    fetch(`https://dmm-api.nobidigi.workers.dev/?keyword=${encodeURIComponent(seriesName)}`)
+    // シリーズIDで検索
+    fetch(`https://dmm-api.nobidigi.workers.dev/?series_id=${seriesId}`)
       .then(res => res.json())
       .then(data => {
         const list = document.getElementById("list");
         list.innerHTML = "";
+
+        if (!data.result || !data.result.items) {
+          list.innerHTML = "作品が見つかりませんでした。";
+          return;
+        }
+
+        // シリーズ名をタイトルに表示
+        const first = data.result.items[0];
+        if (first?.iteminfo?.series?.[0]?.name) {
+          document.getElementById("seriesTitle").textContent =
+            first.iteminfo.series[0].name;
+        }
 
         data.result.items.forEach(item => {
           const div = document.createElement("div");
