@@ -7,7 +7,6 @@
   <style>
     body { font-family: sans-serif; padding: 20px; }
 
-    /* シリーズカードの表示エリア */
     #series-area {
       margin-top: 20px;
       margin-bottom: 30px;
@@ -57,7 +56,6 @@
       }
     }
 
-    /* 作品一覧 */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -103,17 +101,12 @@
   <input id="searchBox" type="text" placeholder="キーワードを入力">
   <button id="searchBtn">検索</button>
 
-  <!-- シリーズカード表示エリア -->
   <div id="series-area"></div>
 
-  <!-- 作品一覧 -->
   <div id="list" class="grid" style="margin-top:20px;">検索してください</div>
 
   <script>
 
-    /* -------------------------
-       シリーズ名正規化
-    ------------------------- */
     function normalizeTitle(title) {
       return title
         .replace(/【.*?】/g, "")
@@ -125,16 +118,10 @@
         .trim();
     }
 
-    /* -------------------------
-       雑誌名抽出
-    ------------------------- */
     function extractMagazineName(title) {
       return title.replace(/\s*\d.*$/, "").trim();
     }
 
-    /* -------------------------
-       カテゴリ判定
-    ------------------------- */
     function detectCategory(items) {
       const count = { comic:0, novel:0, book:0, magazine:0, photo:0, other:0 };
 
@@ -160,39 +147,23 @@
       return "mixed";
     }
 
-    /* -------------------------
-       シリーズキー決定（ハイブリッド方式）
-    ------------------------- */
     function getSeriesKey(item, category) {
-
-      // ① APIのシリーズ名が正しく入っている場合だけ使う
       if (item.iteminfo?.series?.length > 0) {
         const s = item.iteminfo.series[0].name;
         if (s && s.length >= 3) return s;
       }
 
-      // ② 作者名がある場合 → 作者グループ
-      if (item.author?.name) {
-        return item.author.name;
-      }
+      if (item.author?.name) return item.author.name;
 
-      // ③ 雑誌 → 雑誌名
-      if (category === "magazine") {
-        return extractMagazineName(item.title);
-      }
+      if (category === "magazine") return extractMagazineName(item.title);
 
-      // ④ コミック・ラノベ・書籍 → normalizeTitle
       if (["comic","novel","book"].includes(category)) {
         return normalizeTitle(item.title);
       }
 
-      // ⑤ その他 → normalizeTitle
       return normalizeTitle(item.title);
     }
 
-    /* -------------------------
-       グループ化
-    ------------------------- */
     function groupItemsBySeries(items, category) {
       const groups = {};
 
@@ -206,16 +177,10 @@
       return groups;
     }
 
-    /* -------------------------
-       背景画像選択
-    ------------------------- */
     function chooseBackgroundImage(items) {
       return items[0].imageURL.large;
     }
 
-    /* -------------------------
-       シリーズカードHTML生成
-    ------------------------- */
     function createSeriesCardHTML(name, items, category) {
       const bg = chooseBackgroundImage(items);
       const thumb = items[0].imageURL.small;
@@ -240,10 +205,12 @@
       `;
     }
 
-    /* -------------------------
-       シリーズカード描画
-    ------------------------- */
     function renderSeriesCards(items) {
+      if (!items || items.length === 0) {
+        document.getElementById("series-area").innerHTML = "";
+        return;
+      }
+
       const category = detectCategory(items);
       const groups = groupItemsBySeries(items, category);
 
@@ -258,9 +225,6 @@
       document.getElementById("series-area").innerHTML = html;
     }
 
-    /* -------------------------
-       作品一覧描画
-    ------------------------- */
     function renderSearchResults(items) {
       const list = document.getElementById("list");
       list.innerHTML = "";
@@ -285,19 +249,21 @@
       });
     }
 
-    /* -------------------------
-       検索処理
-    ------------------------- */
     function search(keyword) {
       document.getElementById("list").innerHTML = "読み込み中...";
 
       fetch(`https://dmm-api.nobidigi.workers.dev/?keyword=${encodeURIComponent(keyword)}`)
         .then(res => res.json())
         .then(data => {
-          const items = data.result.items;
 
-          renderSeriesCards(items);
-          renderSearchResults(items);
+          const normalItems = data.normal?.result?.items || [];
+          const seriesItems = data.series?.result?.items || [];
+
+          // シリーズカードは seriesItems を優先
+          renderSeriesCards(seriesItems.length > 0 ? seriesItems : normalItems);
+
+          // 一覧は normalItems
+          renderSearchResults(normalItems);
         });
     }
 
