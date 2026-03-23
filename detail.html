@@ -26,42 +26,46 @@
 
   <div id="content">読み込み中...</div>
 
-  <script>
-    // URL から cid を取得
-    const params = new URLSearchParams(location.search);
-    const cid = params.get("cid");
+<script>
+const params = new URLSearchParams(window.location.search);
+const cid = params.get("cid");
 
-    if (!cid) {
-      document.getElementById("content").textContent = "作品IDがありません。";
-    } else {
-      fetch(`https://dmm-api.nobidigi.workers.dev/?cid=${cid}`)
-        .then(res => res.json())
-        .then(data => {
-          const item = data.result.items[0];
-          const div = document.getElementById("content");
+if (!cid) {
+  document.getElementById("detail").innerText = "CID が指定されていません。";
+} else {
+  loadDetail(cid);
+}
 
-          div.innerHTML = `
-            <img src="${item.imageURL.large}" alt="">
-            <div class="title">${item.title}</div>
+async function loadDetail(cid) {
+  const apiUrl = `https://dmm-api.nobidigi.workers.dev/?cid=${cid}`;
 
-            <div class="info">
-              ${item.iteminfo?.author ? "作者: " + item.iteminfo.author[0].name : ""}
-              ${item.iteminfo?.series ? "<br>シリーズ: " + item.iteminfo.series[0].name : ""}
-            </div>
+  try {
+    const res = await fetch(apiUrl, { cache: "no-store" });
+    const data = await res.json();
 
-            <div class="desc">
-              ${item.iteminfo?.volume || ""}
-            </div>
-
-            <a class="link" 
-   href="${item.affiliateURL.replace('pinupgirl-990', 'pinupgirl-001')}" 
-   target="_blank">
-  DMMで作品を見る
-</a>
-          `;
-        });
+    if (!data || !data.result || !data.result.items || data.result.items.length === 0) {
+      document.getElementById("detail").innerText = "データが取得できませんでした。";
+      return;
     }
-  </script>
+
+    const item = data.result.items[0];
+
+    const title = item.title;
+    const image = item.imageURL?.large || item.imageURL?.small || "";
+    const author = item.iteminfo?.author?.[0]?.name || "著者情報なし";
+
+    document.getElementById("detail").innerHTML = `
+      <h2>${title}</h2>
+      <img src="${image}" width="200">
+      <p>${author}</p>
+    `;
+
+  } catch (e) {
+    console.error(e);
+    document.getElementById("detail").innerText = "エラーが発生しました。";
+  }
+}
+</script>
 <footer style="margin-top:40px; text-align:center; font-size:14px; color:#666;">
   Powered by <a href="https://affiliate.dmm.com/api/" target="_blank">DMM.com Webサービス</a>
 </footer>
