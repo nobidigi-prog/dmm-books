@@ -19,15 +19,35 @@ if (!seriesId) {
 }
 
 async function loadSeries(id) {
+
+  // ★ 正しい Worker URL
   const apiUrl = `https://dmm-api.nobidigi.workers.dev/?series_id=${id}`;
+
   try {
     const res = await fetch(apiUrl, { cache: "no-store" });
+
+    // ★ ここは JSON のみ（text() は絶対に使わない）
     const data = await res.json();
 
-    // ★ ここを一旦テキストモードにする
-    const text = await res.text();
-    console.log(text);
-    document.getElementById("book-list").innerText = "レスポンスをコンソールに出力しました。";
+    if (!data || !data.result || !data.result.items) {
+      document.getElementById("book-list").innerText = "データが取得できませんでした。";
+      return;
+    }
+
+    const items = data.result.items;
+    const container = document.getElementById("book-list");
+    container.innerHTML = "";
+
+    items.forEach(item => {
+      const card = document.createElement("div");
+      card.innerHTML = `
+        <h3>${item.title}</h3>
+        <img src="${item.image}" width="120">
+        <p>${item.author}</p>
+        <a href="detail.html?cid=${item.cid}">作品ページへ</a>
+      `;
+      container.appendChild(card);
+    });
 
   } catch (e) {
     console.error(e);
