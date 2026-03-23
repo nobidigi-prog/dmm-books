@@ -71,16 +71,16 @@ div.innerHTML = `
 
   <div class="title">${item.title}</div>
 
-${
-  item.iteminfo &&
-  item.iteminfo.series &&
-  Array.isArray(item.iteminfo.series) &&
-  item.iteminfo.series.length > 0 &&
-  item.iteminfo.series[0].id
-    ? `<a class="link" href="series.html?series_id=${item.series_id}">
-         シリーズページへ
-       </a>`
-    : ""
+${  
+  item.iteminfo &&  
+  item.iteminfo.series &&  
+  Array.isArray(item.iteminfo.series) &&  
+  item.iteminfo.series.length > 0 &&  
+  item.iteminfo.series[0].id  
+    ? `<a class="link" href="series.html?series_id=${item.iteminfo.series[0].id}">  
+         シリーズページへ  
+       </a>`  
+    : ""  
 }
 
   <a class="link" href="${item.affiliateURL.replace('pinupgirl-990', 'pinupgirl-001')}" target="_blank">
