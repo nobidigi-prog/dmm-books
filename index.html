@@ -1,1 +1,20 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>DMM API テスト</title>
+</head>
+<body>
+  <h1>DMM API テスト</h1>
+  <pre id="result">読み込み中...</pre>
 
+  <script>
+    fetch("https://dmm-api.nobidigi.workers.dev/?keyword=ワンピース")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("result").textContent =
+          JSON.stringify(data, null, 2);
+      });
+  </script>
+</body>
+</html>
