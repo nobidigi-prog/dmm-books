@@ -20,45 +20,12 @@ if (!seriesId) {
 
 async function loadSeries(id) {
   try {
-    // ① series_id で Worker に問い合わせ（シリーズ名を取得）
-    const firstUrl = `https://dmm-api.nobidigi.workers.dev/?series_id=${id}`;
-    const firstRes = await fetch(firstUrl, { cache: "no-store" });
-    const firstData = await firstRes.json();
-
-    if (!firstData?.result?.items?.length) {
-      document.getElementById("book-list").innerText = "シリーズ情報が取得できませんでした。";
-      return;
-    }
-
-    // ② 全作品からシリーズ名候補を抽出（多数決）
-    const itemsForName = firstData.result.items;
-
-    const nameCandidates = itemsForName
-      .map(item =>
-        item.series_name ||
-        item.iteminfo?.series?.[0]?.name
-      )
-      .filter(Boolean);
-
-    // 多数決でシリーズ名を決定
-    const seriesName = nameCandidates
-      .sort((a, b) =>
-        nameCandidates.filter(v => v === a).length -
-        nameCandidates.filter(v => v === b).length
-      )
-      .pop();
-
-    if (!seriesName) {
-      document.getElementById("book-list").innerText = "シリーズ名が取得できませんでした。";
-      return;
-    }
-
-    // ③ シリーズ名で再検索（本番のシリーズ一覧）
-    const apiUrl = `https://dmm-api.nobidigi.workers.dev/?series_name=${encodeURIComponent(seriesName)}`;
+    // ★ ① series_id でそのままシリーズ一覧を取得（再検索しない）
+    const apiUrl = `https://dmm-api.nobidigi.workers.dev/?series_id=${id}`;
     const res = await fetch(apiUrl, { cache: "no-store" });
     const data = await res.json();
 
-    if (!data?.result?.items) {
+    if (!data?.result?.items?.length) {
       document.getElementById("book-list").innerText = "シリーズ作品が取得できませんでした。";
       return;
     }
@@ -67,15 +34,15 @@ async function loadSeries(id) {
     const container = document.getElementById("book-list");
     container.innerHTML = "";
 
-    // ④ シリーズ一覧を描画
+    // ② シリーズ一覧を描画
     items.forEach(item => {
       const title = item.title || "タイトル不明";
       const image = item.imageURL?.large || item.imageURL?.small || "";
       const author = item.iteminfo?.author?.[0]?.name || "著者情報なし";
       const cid =
-  item.cid ||
-  item.product_id ||
-  item.content_id;
+        item.cid ||
+        item.product_id ||
+        item.content_id;
 
       const card = document.createElement("div");
       card.innerHTML = `
