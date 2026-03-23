@@ -19,9 +19,11 @@ if (!seriesId) {
 }
 
 async function loadSeries(id) {
-  const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?series_id=${seriesId}`;
+
+  // ★ apiUrl はここで1回だけ宣言する
+  const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?series_id=${id}`;
+
   try {
-    const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?series_id=${id}`;
     const res = await fetch(apiUrl, { cache: "no-store" });
     const data = await res.json();
 
@@ -44,6 +46,7 @@ async function loadSeries(id) {
       `;
       container.appendChild(card);
     });
+
   } catch (e) {
     console.error(e);
     document.getElementById("book-list").innerText = "エラーが発生しました。";
