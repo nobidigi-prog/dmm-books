@@ -40,20 +40,11 @@ async function loadSeries(id) {
 
 items.forEach(item => {
   const title = item.title || "タイトル不明";
+  const image = item.imageURL?.large || item.imageURL?.small || "";
+  const author = item.iteminfo?.author?.[0]?.name || "著者情報なし";
 
-  // 画像
-  const image =
-    item.imageURL?.large ||
-    item.imageURL?.small ||
-    "";
-
-  // 著者
-  const author =
-    item.iteminfo?.author?.[0]?.name ||
-    "著者情報なし";
-
-  // CID
-  const cid = item.cid;
+  // ★ ここが重要
+  const cid = item.cid || item.product_id;
 
   const card = document.createElement("div");
   card.innerHTML = `
