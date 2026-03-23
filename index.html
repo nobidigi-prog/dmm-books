@@ -1,7 +1,87 @@
-<div class="item">
-  <a href="detail.html?cid=${item.content_id}">
-    <img src="${item.imageURL?.large || ''}" alt="">
-  </a>
-  <div class="title">${item.title}</div>
-  <a class="link" href="${item.affiliateURL}" target="_blank">作品ページへ</a>
-</div>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>DMM作品検索</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+    .item {
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .item img {
+      width: 100%;
+      border-radius: 6px;
+    }
+    .title {
+      font-size: 14px;
+      margin-top: 8px;
+      font-weight: bold;
+    }
+    .link {
+      display: block;
+      margin-top: 6px;
+      color: #0070f3;
+    }
+    #searchBox {
+      width: 300px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    #searchBtn {
+      padding: 8px 12px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>DMM作品検索</h1>
+
+  <input id="searchBox" type="text" placeholder="キーワードを入力">
+  <button id="searchBtn">検索</button>
+
+  <div id="list" class="grid" style="margin-top:20px;">検索してください</div>
+
+  <script>
+    function search(keyword) {
+      const list = document.getElementById("list");
+      list.innerHTML = "読み込み中...";
+
+      fetch(`https://dmm-api.nobidigi.workers.dev/?keyword=${encodeURIComponent(keyword)}`)
+        .then(res => res.json())
+        .then(data => {
+          list.innerHTML = "";
+
+          data.result.items.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "item";
+
+            div.innerHTML = `
+              <a href="detail.html?cid=${item.content_id}">
+                <img src="${item.imageURL?.large || ''}" alt="">
+              </a>
+              <div class="title">${item.title}</div>
+              <a class="link" href="${item.affiliateURL}" target="_blank">DMMで見る</a>
+            `;
+
+            list.appendChild(div);
+          });
+        });
+    }
+
+    document.getElementById("searchBtn").onclick = () => {
+      const keyword = document.getElementById("searchBox").value;
+      if (keyword.trim() !== "") search(keyword);
+    };
+  </script>
+
+</body>
+</html>
