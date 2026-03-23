@@ -19,18 +19,33 @@ if (!seriesId) {
 }
 
 async function loadSeries(id) {
-
-  // ★ 正しい Worker URL
-  const apiUrl = `https://dmm-api.nobidigi.workers.dev/?series_id=${id}`;
-
   try {
-    const res = await fetch(apiUrl, { cache: "no-store" });
+    // ① series_id で Worker に問い合わせ（シリーズ名を取得）
+    const firstUrl = `https://dmm-api.nobidigi.workers.dev/?series_id=${id}`;
+    const firstRes = await fetch(firstUrl, { cache: "no-store" });
+    const firstData = await firstRes.json();
 
-    // ★ ここは JSON のみ（text() は絶対に使わない）
+    if (!firstData?.result?.items?.length) {
+      document.getElementById("book-list").innerText = "シリーズ情報が取得できませんでした。";
+      return;
+    }
+
+    // ② 最初の作品からシリーズ名を取得
+    const firstItem = firstData.result.items[0];
+    const seriesName = firstItem.series_name;
+
+    if (!seriesName) {
+      document.getElementById("book-list").innerText = "シリーズ名が取得できませんでした。";
+      return;
+    }
+
+    // ③ シリーズ名で再検索（本番のシリーズ一覧）
+    const apiUrl = `https://dmm-api.nobidigi.workers.dev/?series_name=${encodeURIComponent(seriesName)}`;
+    const res = await fetch(apiUrl, { cache: "no-store" });
     const data = await res.json();
 
-    if (!data || !data.result || !data.result.items) {
-      document.getElementById("book-list").innerText = "データが取得できませんでした。";
+    if (!data?.result?.items) {
+      document.getElementById("book-list").innerText = "シリーズ作品が取得できませんでした。";
       return;
     }
 
@@ -38,23 +53,22 @@ async function loadSeries(id) {
     const container = document.getElementById("book-list");
     container.innerHTML = "";
 
-items.forEach(item => {
-  const title = item.title || "タイトル不明";
-  const image = item.imageURL?.large || item.imageURL?.small || "";
-  const author = item.iteminfo?.author?.[0]?.name || "著者情報なし";
+    // ④ シリーズ一覧を描画
+    items.forEach(item => {
+      const title = item.title || "タイトル不明";
+      const image = item.imageURL?.large || item.imageURL?.small || "";
+      const author = item.iteminfo?.author?.[0]?.name || "著者情報なし";
+      const cid = item.cid || item.product_id;
 
-  // ★ ここが重要
-  const cid = item.cid || item.product_id;
-
-  const card = document.createElement("div");
-  card.innerHTML = `
-    <h3>${title}</h3>
-    <img src="${image}" width="120">
-    <p>${author}</p>
-    <a href="detail.html?cid=${cid}">作品ページへ</a>
-  `;
-  container.appendChild(card);
-});
+      const card = document.createElement("div");
+      card.innerHTML = `
+        <h3>${title}</h3>
+        <img src="${image}" width="120">
+        <p>${author}</p>
+        <a href="detail.html?cid=${cid}">作品ページへ</a>
+      `;
+      container.appendChild(card);
+    });
 
   } catch (e) {
     console.error(e);
