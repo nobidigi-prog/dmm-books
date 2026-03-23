@@ -53,13 +53,15 @@ async function loadDetail(cid) {
     const title = item.title;
     const image = item.imageURL?.large || item.imageURL?.small || "";
     const author = item.iteminfo?.author?.[0]?.name || "著者情報なし";
+    const link = item.affiliateURL;  // ★ここが重要
 
     document.getElementById("content").innerHTML = `
       <h2>${title}</h2>
       <img src="${image}" width="200">
       <p>${author}</p>
-    `;
 
+      <a class="link" href="${link}" target="_blank">DMMで作品を見る</a>
+    `;
   } catch (e) {
     console.error(e);
     document.getElementById("content").innerText = "エラーが発生しました。";
