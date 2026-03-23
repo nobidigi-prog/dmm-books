@@ -163,26 +163,45 @@
     /* -------------------------
        グループ化
     ------------------------- */
-    function groupItemsBySeries(items, category) {
-      const groups = {};
+function getSeriesKey(item, category) {
 
-      items.forEach(item => {
-        let key;
+  // ① APIのシリーズ名が正しく入っている場合だけ使う
+  if (item.iteminfo?.series?.length > 0) {
+    const s = item.iteminfo.series[0].name;
+    if (s && s.length >= 3) return s; // 3文字未満はノイズ扱い
+  }
 
-        if (["comic","novel","book"].includes(category)) {
-          key = normalizeTitle(item.title);
-        } else if (category === "magazine") {
-          key = extractMagazineName(item.title);
-        } else {
-          key = item.author?.name || "不明な作者";
-        }
+  // ② 作者名がある場合 → 作者グループ
+  if (item.author?.name) {
+    return item.author.name;
+  }
 
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(item);
-      });
+  // ③ 雑誌 → 雑誌名
+  if (category === "magazine") {
+    return extractMagazineName(item.title);
+  }
 
-      return groups;
-    }
+  // ④ コミック・ラノベ・書籍 → normalizeTitle
+  if (["comic","novel","book"].includes(category)) {
+    return normalizeTitle(item.title);
+  }
+
+  // ⑤ その他 → normalizeTitle
+  return normalizeTitle(item.title);
+}
+
+function groupItemsBySeries(items, category) {
+  const groups = {};
+
+  items.forEach(item => {
+    const key = getSeriesKey(item, category);
+
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(item);
+  });
+
+  return groups;
+}
 
     /* -------------------------
        背景画像選択
