@@ -4,28 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>シリーズ一覧</title>
-
-    <!-- キャッシュ無効化（GitHub Pages 対策） -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-        }
-        .book-card {
-            border: 1px solid #ccc;
-            padding: 12px;
-            margin-bottom: 12px;
-            border-radius: 6px;
-        }
-        .book-card img {
-            width: 120px;
-            height: auto;
-        }
-    </style>
 </head>
 <body>
 
@@ -33,50 +11,45 @@
 <div id="book-list">読み込み中...</div>
 
 <script>
-// URL の ?id=xxxxx を取得
+// URL の ?ids=123,456 の部分を取得
 const params = new URLSearchParams(window.location.search);
-const seriesId = params.get("id");
+const idsParam = params.get("ids");
 
-if (!seriesId) {
-    document.getElementById("book-list").innerText = "シリーズIDが指定されていません。";
+if (!idsParam) {
+    document.getElementById("book-list").innerText = "作品ID一覧が指定されていません。";
 } else {
-    loadSeries(seriesId);
+    const ids = idsParam.split(",");
+    loadSeries(ids);
 }
 
-async function loadSeries(id) {
-    try {
-        // Cloudflare Worker の API（あなたの index.html と同じ形式）
-        const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?series_id=${id}`;
+async function loadSeries(ids) {
+    const container = document.getElementById("book-list");
+    container.innerHTML = "";
 
-        const res = await fetch(apiUrl, { cache: "no-store" });
-        const data = await res.json();
+    for (const id of ids) {
+        try {
+            const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?id=${id}`;
+            const res = await fetch(apiUrl, { cache: "no-store" });
+            const data = await res.json();
 
-        if (!data || !data.result || !data.result.items) {
-            document.getElementById("book-list").innerText = "データが取得できませんでした。";
-            return;
-        }
+            if (!data || !data.result || !data.result.items || data.result.items.length === 0) {
+                continue;
+            }
 
-        const items = data.result.items;
-        const container = document.getElementById("book-list");
-        container.innerHTML = "";
+            const item = data.result.items[0];
 
-        items.forEach(item => {
             const card = document.createElement("div");
-            card.className = "book-card";
-
             card.innerHTML = `
                 <h3>${item.title}</h3>
-                <img src="${item.image}" alt="${item.title}">
+                <img src="${item.image}" width="120">
                 <p>${item.author}</p>
                 <a href="detail.html?id=${item.product_id}">作品ページへ</a>
             `;
-
             container.appendChild(card);
-        });
 
-    } catch (e) {
-        document.getElementById("book-list").innerText = "エラーが発生しました。";
-        console.error(e);
+        } catch (e) {
+            console.error(e);
+        }
     }
 }
 </script>
