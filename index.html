@@ -71,13 +71,13 @@ div.innerHTML = `
 
   <div class="title">${item.title}</div>
 
-${
-  item.iteminfo?.series && item.iteminfo.series[0]?.id
-    ? `<a class="link" href="series.html?id=${item.iteminfo.series[0].id}">
-         シリーズページへ
-       </a>`
-    : ""
-}
+  ${
+    item.iteminfo?.series
+      ? `<a class="link" href="series.html?name=${encodeURIComponent(item.iteminfo.series[0].name)}">
+           シリーズページへ
+         </a>`
+      : ""
+  }
 
   <a class="link" href="${item.affiliateURL.replace('pinupgirl-990', 'pinupgirl-001')}" target="_blank">
     DMMで見る
