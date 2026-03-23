@@ -72,7 +72,11 @@ div.innerHTML = `
   <div class="title">${item.title}</div>
 
 ${
-  item.iteminfo?.series && item.iteminfo.series[0]?.id
+  item.iteminfo &&
+  item.iteminfo.series &&
+  Array.isArray(item.iteminfo.series) &&
+  item.iteminfo.series.length > 0 &&
+  item.iteminfo.series[0].id
     ? `<a class="link" href="series.html?id=${item.iteminfo.series[0].id}">
          シリーズページへ
        </a>`
