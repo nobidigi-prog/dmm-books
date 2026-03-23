@@ -161,47 +161,50 @@
     }
 
     /* -------------------------
+       シリーズキー決定（ハイブリッド方式）
+    ------------------------- */
+    function getSeriesKey(item, category) {
+
+      // ① APIのシリーズ名が正しく入っている場合だけ使う
+      if (item.iteminfo?.series?.length > 0) {
+        const s = item.iteminfo.series[0].name;
+        if (s && s.length >= 3) return s;
+      }
+
+      // ② 作者名がある場合 → 作者グループ
+      if (item.author?.name) {
+        return item.author.name;
+      }
+
+      // ③ 雑誌 → 雑誌名
+      if (category === "magazine") {
+        return extractMagazineName(item.title);
+      }
+
+      // ④ コミック・ラノベ・書籍 → normalizeTitle
+      if (["comic","novel","book"].includes(category)) {
+        return normalizeTitle(item.title);
+      }
+
+      // ⑤ その他 → normalizeTitle
+      return normalizeTitle(item.title);
+    }
+
+    /* -------------------------
        グループ化
     ------------------------- */
-function getSeriesKey(item, category) {
+    function groupItemsBySeries(items, category) {
+      const groups = {};
 
-  // ① APIのシリーズ名が正しく入っている場合だけ使う
-  if (item.iteminfo?.series?.length > 0) {
-    const s = item.iteminfo.series[0].name;
-    if (s && s.length >= 3) return s; // 3文字未満はノイズ扱い
-  }
+      items.forEach(item => {
+        const key = getSeriesKey(item, category);
 
-  // ② 作者名がある場合 → 作者グループ
-  if (item.author?.name) {
-    return item.author.name;
-  }
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+      });
 
-  // ③ 雑誌 → 雑誌名
-  if (category === "magazine") {
-    return extractMagazineName(item.title);
-  }
-
-  // ④ コミック・ラノベ・書籍 → normalizeTitle
-  if (["comic","novel","book"].includes(category)) {
-    return normalizeTitle(item.title);
-  }
-
-  // ⑤ その他 → normalizeTitle
-  return normalizeTitle(item.title);
-}
-
-function groupItemsBySeries(items, category) {
-  const groups = {};
-
-  items.forEach(item => {
-    const key = getSeriesKey(item, category);
-
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(item);
-  });
-
-  return groups;
-}
+      return groups;
+    }
 
     /* -------------------------
        背景画像選択
