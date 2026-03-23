@@ -29,8 +29,8 @@ async function search() {
   const keyword = document.getElementById("keyword").value.trim();
   if (!keyword) return;
 
-  // Worker を相対パスで呼ぶ（/worker 固定ではない）
-  const url = `./worker?mode=index&keyword=${encodeURIComponent(keyword)}`;
+  // ★ Cloudflare Worker の絶対 URL を使用
+  const url = `https://dmm-api.nobidigi.workers.dev/?mode=index&keyword=${encodeURIComponent(keyword)}`;
 
   let res;
   try {
