@@ -38,16 +38,32 @@ async function loadSeries(id) {
     const container = document.getElementById("book-list");
     container.innerHTML = "";
 
-    items.forEach(item => {
-      const card = document.createElement("div");
-      card.innerHTML = `
-        <h3>${item.title}</h3>
-        <img src="${item.image}" width="120">
-        <p>${item.author}</p>
-        <a href="detail.html?cid=${item.cid}">作品ページへ</a>
-      `;
-      container.appendChild(card);
-    });
+items.forEach(item => {
+  const title = item.title || "タイトル不明";
+
+  // 画像
+  const image =
+    item.imageURL?.large ||
+    item.imageURL?.small ||
+    "";
+
+  // 著者
+  const author =
+    item.iteminfo?.author?.[0]?.name ||
+    "著者情報なし";
+
+  // CID
+  const cid = item.cid;
+
+  const card = document.createElement("div");
+  card.innerHTML = `
+    <h3>${title}</h3>
+    <img src="${image}" width="120">
+    <p>${author}</p>
+    <a href="detail.html?cid=${cid}">作品ページへ</a>
+  `;
+  container.appendChild(card);
+});
 
   } catch (e) {
     console.error(e);
