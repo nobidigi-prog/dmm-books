@@ -1,1 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>シリーズ一覧</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+    .item {
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .item img {
+      width: 100%;
+      border-radius: 6px;
+    }
+    .title {
+      font-size: 14px;
+      margin-top: 8px;
+      font-weight: bold;
+    }
+    .link {
+      display: block;
+      margin-top: 6px;
+      color: #0070f3;
+    }
+  </style>
+</head>
+<body>
 
+  <h1 id="seriesTitle">シリーズ一覧</h1>
+
+  <div id="list" class="grid" style="margin-top:20px;">読み込み中...</div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const seriesName = params.get("name");
+
+    document.getElementById("seriesTitle").textContent = seriesName;
+
+    fetch(`https://dmm-api.nobidigi.workers.dev/?keyword=${encodeURIComponent(seriesName)}`)
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById("list");
+        list.innerHTML = "";
+
+        data.result.items.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "item";
+
+          div.innerHTML = `
+            <a href="detail.html?cid=${item.content_id}">
+              <img src="${item.imageURL?.large || ''}" alt="">
+            </a>
+            <div class="title">${item.title}</div>
+
+            <a class="link" 
+               href="${item.affiliateURL.replace('pinupgirl-990', 'pinupgirl-001')}" 
+               target="_blank">
+              DMMで見る
+            </a>
+          `;
+
+          list.appendChild(div);
+        });
+      });
+  </script>
+
+  <footer style="margin-top:40px; text-align:center; font-size:14px; color:#666;">
+    Powered by <a href="https://affiliate.dmm.com/api/" target="_blank">DMM.com Webサービス</a>
+  </footer>
+
+</body>
+</html>
