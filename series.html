@@ -11,9 +11,9 @@
 <div id="book-list">読み込み中...</div>
 
 <script>
-// URL の ?ids=123,456 の部分を取得
+// URL の ?cids=123,456 の部分を取得
 const params = new URLSearchParams(window.location.search);
-const idsParam = params.get("ids");
+const idsParam = params.get("cids");
 
 if (!idsParam) {
     document.getElementById("book-list").innerText = "作品ID一覧が指定されていません。";
@@ -28,7 +28,7 @@ async function loadSeries(ids) {
 
     for (const id of ids) {
         try {
-            const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?id=${id}`;
+            const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?cid=${id}`;
             const res = await fetch(apiUrl, { cache: "no-store" });
             const data = await res.json();
 
@@ -43,7 +43,7 @@ async function loadSeries(ids) {
                 <h3>${item.title}</h3>
                 <img src="${item.image}" width="120">
                 <p>${item.author}</p>
-                <a href="detail.html?id=${item.product_id}">作品ページへ</a>
+                <a href="detail.html?cid=${item.cid}">作品ページへ</a>
             `;
             container.appendChild(card);
 
