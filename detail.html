@@ -53,7 +53,11 @@
               ${item.iteminfo?.volume || ""}
             </div>
 
-            <a class="link" href="${item.affiliateURL}" target="_blank">DMMで作品を見る</a>
+            <a class="link" 
+   href="${item.affiliateURL.replace('pinupgirl-990', 'pinupgirl-001')}" 
+   target="_blank">
+  DMMで作品を見る
+</a>
           `;
         });
     }
