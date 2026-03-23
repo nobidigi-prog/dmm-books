@@ -1,58 +1,53 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>シリーズ一覧</title>
+  <meta charset="UTF-8" />
+  <title>シリーズ一覧</title>
 </head>
 <body>
-
 <h1>シリーズ一覧</h1>
 <div id="book-list">読み込み中...</div>
 
 <script>
-// URL の ?cids=123,456 の部分を取得
 const params = new URLSearchParams(window.location.search);
-const idsParam = params.get("cids");
+const seriesId = params.get("series_id");
 
-if (!idsParam) {
-    document.getElementById("book-list").innerText = "作品ID一覧が指定されていません。";
+if (!seriesId) {
+  document.getElementById("book-list").innerText = "シリーズIDが指定されていません。";
 } else {
-    const ids = idsParam.split(",");
-    loadSeries(ids);
+  loadSeries(seriesId);
 }
 
-async function loadSeries(ids) {
+async function loadSeries(id) {
+  try {
+    const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?series_id=${id}`;
+    const res = await fetch(apiUrl, { cache: "no-store" });
+    const data = await res.json();
+
+    if (!data || !data.result || !data.result.items) {
+      document.getElementById("book-list").innerText = "データが取得できませんでした。";
+      return;
+    }
+
+    const items = data.result.items;
     const container = document.getElementById("book-list");
     container.innerHTML = "";
 
-    for (const id of ids) {
-        try {
-            const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?cid=${id}`;
-            const res = await fetch(apiUrl, { cache: "no-store" });
-            const data = await res.json();
-
-            if (!data || !data.result || !data.result.items || data.result.items.length === 0) {
-                continue;
-            }
-
-            const item = data.result.items[0];
-
-            const card = document.createElement("div");
-            card.innerHTML = `
-                <h3>${item.title}</h3>
-                <img src="${item.image}" width="120">
-                <p>${item.author}</p>
-                <a href="detail.html?cid=${item.cid}">作品ページへ</a>
-            `;
-            container.appendChild(card);
-
-        } catch (e) {
-            console.error(e);
-        }
-    }
+    items.forEach(item => {
+      const card = document.createElement("div");
+      card.innerHTML = `
+        <h3>${item.title}</h3>
+        <img src="${item.image}" width="120">
+        <p>${item.author}</p>
+        <a href="detail.html?cid=${item.cid}">作品ページへ</a>
+      `;
+      container.appendChild(card);
+    });
+  } catch (e) {
+    console.error(e);
+    document.getElementById("book-list").innerText = "エラーが発生しました。";
+  }
 }
 </script>
-
 </body>
 </html>
