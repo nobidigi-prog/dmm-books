@@ -19,10 +19,10 @@ if (!seriesId) {
 }
 
 async function loadSeries(id) {
-  const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?series_id=${id}`;
-
+  const apiUrl = `https://dmm-api.nobidigi.workers.dev/?series_id=${id}`;
   try {
     const res = await fetch(apiUrl, { cache: "no-store" });
+    const data = await res.json();
 
     // ★ ここを一旦テキストモードにする
     const text = await res.text();
