@@ -31,7 +31,8 @@ async function loadSeries() {
     return;
   }
 
-  const url = `./worker?mode=product&keyword=${encodeURIComponent(keyword)}`;
+  // ★ Cloudflare Worker の絶対 URL を使用
+  const url = `https://dmm-api.nobidigi.workers.dev/?mode=product&keyword=${encodeURIComponent(keyword)}`;
 
   let res;
   try {
