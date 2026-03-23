@@ -46,7 +46,7 @@ if (!seriesId) {
 async function loadSeries(id) {
     try {
         // Cloudflare Worker の API（あなたの index.html と同じ形式）
-        const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?id=${id}`;
+        const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?series_id=${id}`;
 
         const res = await fetch(apiUrl, { cache: "no-store" });
         const data = await res.json();
