@@ -19,6 +19,7 @@ if (!seriesId) {
 }
 
 async function loadSeries(id) {
+  const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?series_id=${seriesId}`;
   try {
     const apiUrl = `https://dmm-worker.nobidigi.workers.dev/?series_id=${id}`;
     const res = await fetch(apiUrl, { cache: "no-store" });
