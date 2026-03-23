@@ -72,7 +72,10 @@ async function loadSeries(id) {
       const title = item.title || "タイトル不明";
       const image = item.imageURL?.large || item.imageURL?.small || "";
       const author = item.iteminfo?.author?.[0]?.name || "著者情報なし";
-      const cid = item.cid || item.product_id;
+      const cid =
+  item.cid ||
+  item.product_id ||
+  item.content_id;
 
       const card = document.createElement("div");
       card.innerHTML = `
