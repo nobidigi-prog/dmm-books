@@ -64,17 +64,25 @@
             const div = document.createElement("div");
             div.className = "item";
 
-            div.innerHTML = `
-              <a href="detail.html?cid=${item.content_id}">
-                <img src="${item.imageURL?.large || ''}" alt="">
-              </a>
-              <div class="title">${item.title}</div>
-                          <a class="link" 
-   href="${item.affiliateURL.replace('pinupgirl-990', 'pinupgirl-001')}" 
-   target="_blank">
-  DMMで作品を見る
-</a>
-            `;
+div.innerHTML = `
+  <a href="detail.html?cid=${item.content_id}">
+    <img src="${item.imageURL?.large || ''}" alt="">
+  </a>
+
+  <div class="title">${item.title}</div>
+
+  ${
+    item.iteminfo?.series
+      ? `<a class="link" href="series.html?name=${encodeURIComponent(item.iteminfo.series[0].name)}">
+           シリーズページへ
+         </a>`
+      : ""
+  }
+
+  <a class="link" href="${item.affiliateURL.replace('pinupgirl-990', 'pinupgirl-001')}" target="_blank">
+    DMMで見る
+  </a>
+`;
 
             list.appendChild(div);
           });
