@@ -31,7 +31,7 @@ const params = new URLSearchParams(window.location.search);
 const cid = params.get("cid");
 
 if (!cid) {
-  document.getElementById("detail").innerText = "CID が指定されていません。";
+  document.getElementById("content").innerText = "CID が指定されていません。";
 } else {
   loadDetail(cid);
 }
@@ -44,7 +44,7 @@ async function loadDetail(cid) {
     const data = await res.json();
 
     if (!data || !data.result || !data.result.items || data.result.items.length === 0) {
-      document.getElementById("detail").innerText = "データが取得できませんでした。";
+      document.getElementById("content").innerText = "データが取得できませんでした。";
       return;
     }
 
@@ -54,7 +54,7 @@ async function loadDetail(cid) {
     const image = item.imageURL?.large || item.imageURL?.small || "";
     const author = item.iteminfo?.author?.[0]?.name || "著者情報なし";
 
-    document.getElementById("detail").innerHTML = `
+    document.getElementById("content").innerHTML = `
       <h2>${title}</h2>
       <img src="${image}" width="200">
       <p>${author}</p>
@@ -62,10 +62,11 @@ async function loadDetail(cid) {
 
   } catch (e) {
     console.error(e);
-    document.getElementById("detail").innerText = "エラーが発生しました。";
+    document.getElementById("content").innerText = "エラーが発生しました。";
   }
 }
 </script>
+
 <footer style="margin-top:40px; text-align:center; font-size:14px; color:#666;">
   Powered by <a href="https://affiliate.dmm.com/api/" target="_blank">DMM.com Webサービス</a>
 </footer>
