@@ -7,6 +7,7 @@
   body { font-family: sans-serif; padding: 20px; }
   .item { margin-bottom: 20px; cursor: pointer; }
   img { width: 120px; }
+  .credit { margin-top: 40px; font-size: 12px; color: #666; }
 </style>
 </head>
 <body>
@@ -18,14 +19,28 @@
 
 <div id="results"></div>
 
+<!-- DMM クレジット（全ページ必須） -->
+<div class="credit">
+  Powered by <a href="https://affiliate.dmm.com/api/" target="_blank">DMM.com Webサービス</a>
+</div>
+
 <script>
 async function search() {
-  const keyword = document.getElementById("keyword").value;
-  const url = `/worker?mode=index&keyword=${encodeURIComponent(keyword)}`;
+  const keyword = document.getElementById("keyword").value.trim();
+  if (!keyword) return;
 
-  const res = await fetch(url);
+  // Worker を相対パスで呼ぶ（/worker 固定ではない）
+  const url = `./worker?mode=index&keyword=${encodeURIComponent(keyword)}`;
+
+  let res;
+  try {
+    res = await fetch(url);
+  } catch (e) {
+    document.getElementById("results").innerHTML = "Worker に接続できません。";
+    return;
+  }
+
   const data = await res.json();
-
   const container = document.getElementById("results");
   container.innerHTML = "";
 
@@ -42,7 +57,6 @@ async function search() {
       <div>${item.title}</div>
     `;
     div.onclick = () => {
-      // series.html に遷移（product モードでシリーズ検索）
       window.location.href = `series.html?keyword=${encodeURIComponent(keyword)}`;
     };
     container.appendChild(div);
