@@ -3,8 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <title>DMM作品検索</title>
+
   <style>
     body { font-family: sans-serif; padding: 20px; }
+
+    /* シリーズカードの表示エリア */
+    #series-area {
+      margin-top: 20px;
+      margin-bottom: 30px;
+    }
+
+    .series-card {
+      display: block;
+      padding: 16px;
+      border-radius: 12px;
+      color: white;
+      margin-bottom: 16px;
+      background-size: cover;
+      background-position: center;
+      background-image: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .series-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(6px);
+    }
+
+    .series-card-content {
+      position: relative;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      z-index: 1;
+    }
+
+    .series-card-content img {
+      width: 80px;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 600px) {
+      .series-card-content {
+        flex-direction: column;
+        text-align: center;
+      }
+      .series-card-content img {
+        width: 120px;
+      }
+    }
+
+    /* 作品一覧 */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -30,6 +83,7 @@
       margin-top: 6px;
       color: #0070f3;
     }
+
     #searchBox {
       width: 300px;
       padding: 8px;
@@ -41,6 +95,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <h1>DMM作品検索</h1>
@@ -48,48 +103,179 @@
   <input id="searchBox" type="text" placeholder="キーワードを入力">
   <button id="searchBtn">検索</button>
 
+  <!-- シリーズカード表示エリア -->
+  <div id="series-area"></div>
+
+  <!-- 作品一覧 -->
   <div id="list" class="grid" style="margin-top:20px;">検索してください</div>
 
   <script>
-    function search(keyword) {
+
+    /* -------------------------
+       シリーズ名正規化
+    ------------------------- */
+    function normalizeTitle(title) {
+      return title
+        .replace(/【.*?】/g, "")
+        .replace(/第?\d+巻/g, "")
+        .replace(/\d+巻/g, "")
+        .replace(/第?\d+話/g, "")
+        .replace(/\(\d+\)/g, "")
+        .replace(/\d+$/g, "")
+        .trim();
+    }
+
+    /* -------------------------
+       雑誌名抽出
+    ------------------------- */
+    function extractMagazineName(title) {
+      return title.replace(/\s*\d.*$/, "").trim();
+    }
+
+    /* -------------------------
+       カテゴリ判定
+    ------------------------- */
+    function detectCategory(items) {
+      const count = { comic:0, novel:0, book:0, magazine:0, photo:0, other:0 };
+
+      items.forEach(item => {
+        const genre = item.service_name || item.floor_name || "";
+
+        if (genre.includes("コミック")) count.comic++;
+        else if (genre.includes("ライトノベル")) count.novel++;
+        else if (genre.includes("文芸")) count.book++;
+        else if (genre.includes("雑誌")) count.magazine++;
+        else if (genre.includes("写真集")) count.photo++;
+        else count.other++;
+      });
+
+      const total = items.length;
+
+      if (count.comic / total > 0.5) return "comic";
+      if (count.novel / total > 0.5) return "novel";
+      if (count.book / total > 0.5) return "book";
+      if (count.magazine / total > 0.5) return "magazine";
+      if (count.photo / total > 0.5) return "photo";
+
+      return "mixed";
+    }
+
+    /* -------------------------
+       グループ化
+    ------------------------- */
+    function groupItemsBySeries(items, category) {
+      const groups = {};
+
+      items.forEach(item => {
+        let key;
+
+        if (["comic","novel","book"].includes(category)) {
+          key = normalizeTitle(item.title);
+        } else if (category === "magazine") {
+          key = extractMagazineName(item.title);
+        } else {
+          key = item.author?.name || "不明な作者";
+        }
+
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+      });
+
+      return groups;
+    }
+
+    /* -------------------------
+       背景画像選択
+    ------------------------- */
+    function chooseBackgroundImage(items) {
+      return items[0].imageURL.large;
+    }
+
+    /* -------------------------
+       シリーズカードHTML生成
+    ------------------------- */
+    function createSeriesCardHTML(name, items, category) {
+      const bg = chooseBackgroundImage(items);
+      const thumb = items[0].imageURL.small;
+      const count = items.length;
+      const author = items[0].author?.name || "";
+
+      const url = (category === "photo" || category === "mixed")
+        ? `series.html?author=${encodeURIComponent(author)}`
+        : `series.html?name=${encodeURIComponent(name)}`;
+
+      return `
+        <a href="${url}" class="series-card" style="--bg:url('${bg}')">
+          <div class="series-card-content">
+            <img src="${thumb}">
+            <div>
+              <h3>${name}</h3>
+              <p>作品数：${count}</p>
+              ${author ? `<p>作者：${author}</p>` : ""}
+            </div>
+          </div>
+        </a>
+      `;
+    }
+
+    /* -------------------------
+       シリーズカード描画
+    ------------------------- */
+    function renderSeriesCards(items) {
+      const category = detectCategory(items);
+      const groups = groupItemsBySeries(items, category);
+
+      let html = "";
+
+      Object.keys(groups).forEach(name => {
+        const groupItems = groups[name];
+        if (groupItems.length < 2 && category !== "photo") return;
+        html += createSeriesCardHTML(name, groupItems, category);
+      });
+
+      document.getElementById("series-area").innerHTML = html;
+    }
+
+    /* -------------------------
+       作品一覧描画
+    ------------------------- */
+    function renderSearchResults(items) {
       const list = document.getElementById("list");
-      list.innerHTML = "読み込み中...";
+      list.innerHTML = "";
+
+      items.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "item";
+
+        div.innerHTML = `
+          <a href="detail.html?cid=${item.content_id}">
+            <img src="${item.imageURL?.large || ''}">
+          </a>
+
+          <div class="title">${item.title}</div>
+
+          <a class="link" href="${item.affiliateURL.replace('pinupgirl-990','pinupgirl-001')}" target="_blank">
+            DMMで見る
+          </a>
+        `;
+
+        list.appendChild(div);
+      });
+    }
+
+    /* -------------------------
+       検索処理
+    ------------------------- */
+    function search(keyword) {
+      document.getElementById("list").innerHTML = "読み込み中...";
 
       fetch(`https://dmm-api.nobidigi.workers.dev/?keyword=${encodeURIComponent(keyword)}`)
         .then(res => res.json())
         .then(data => {
-          list.innerHTML = "";
+          const items = data.result.items;
 
-          data.result.items.forEach(item => {
-            const div = document.createElement("div");
-            div.className = "item";
-
-div.innerHTML = `
-  <a href="detail.html?cid=${item.content_id}">
-    <img src="${item.imageURL?.large || ''}" alt="">
-  </a>
-
-  <div class="title">${item.title}</div>
-
-${  
-  item.iteminfo &&  
-  item.iteminfo.series &&  
-  Array.isArray(item.iteminfo.series) &&  
-  item.iteminfo.series.length > 0 &&  
-  item.iteminfo.series[0].id  
-    ? `<a class="link" href="series.html?series_id=${item.iteminfo.series[0].id}">  
-         シリーズページへ  
-       </a>`  
-    : ""  
-}
-
-  <a class="link" href="${item.affiliateURL.replace('pinupgirl-990', 'pinupgirl-001')}" target="_blank">
-    DMMで見る
-  </a>
-`;
-
-            list.appendChild(div);
-          });
+          renderSeriesCards(items);
+          renderSearchResults(items);
         });
     }
 
@@ -97,9 +283,12 @@ ${
       const keyword = document.getElementById("searchBox").value;
       if (keyword.trim() !== "") search(keyword);
     };
+
   </script>
-<footer style="margin-top:40px; text-align:center; font-size:14px; color:#666;">
-  Powered by <a href="https://affiliate.dmm.com/api/" target="_blank">DMM.com Webサービス</a>
-</footer>
+
+  <footer style="margin-top:40px; text-align:center; font-size:14px; color:#666;">
+    Powered by <a href="https://affiliate.dmm.com/api/" target="_blank">DMM.com Webサービス</a>
+  </footer>
+
 </body>
 </html>
