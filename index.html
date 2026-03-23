@@ -42,7 +42,7 @@ async function search() {
       <div>${item.title}</div>
     `;
     div.onclick = () => {
-      // series.html に遷移
+      // series.html に遷移（product モードでシリーズ検索）
       window.location.href = `series.html?keyword=${encodeURIComponent(keyword)}`;
     };
     container.appendChild(div);
