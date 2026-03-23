@@ -107,6 +107,9 @@
 
   <script>
 
+    /* -------------------------
+       タイトル正規化（漫画用）
+    ------------------------- */
     function normalizeTitle(title) {
       return title
         .replace(/【.*?】/g, "")
@@ -118,10 +121,16 @@
         .trim();
     }
 
+    /* -------------------------
+       雑誌名抽出
+    ------------------------- */
     function extractMagazineName(title) {
       return title.replace(/\s*\d.*$/, "").trim();
     }
 
+    /* -------------------------
+       カテゴリ判定
+    ------------------------- */
     function detectCategory(items) {
       const count = { comic:0, novel:0, book:0, magazine:0, photo:0, other:0 };
 
@@ -147,23 +156,38 @@
       return "mixed";
     }
 
+    /* -------------------------
+       シリーズキー生成（超重要）
+    ------------------------- */
     function getSeriesKey(item, category) {
-      if (item.iteminfo?.series?.length > 0) {
-        const s = item.iteminfo.series[0].name;
-        if (s && s.length >= 3) return s;
+
+      // ★ 写真集（タレント名）
+      if (item.iteminfo?.actor?.length > 0) {
+        return item.iteminfo.actor[0].name;
       }
 
-      if (item.author?.name) return item.author.name;
+      // ★ 通常の作者名
+      if (item.author?.name) {
+        return item.author.name;
+      }
 
-      if (category === "magazine") return extractMagazineName(item.title);
+      // ★ 雑誌
+      if (category === "magazine") {
+        return extractMagazineName(item.title);
+      }
 
+      // ★ 漫画・小説・書籍
       if (["comic","novel","book"].includes(category)) {
         return normalizeTitle(item.title);
       }
 
+      // ★ その他
       return normalizeTitle(item.title);
     }
 
+    /* -------------------------
+       シリーズごとにグループ化
+    ------------------------- */
     function groupItemsBySeries(items, category) {
       const groups = {};
 
@@ -177,15 +201,21 @@
       return groups;
     }
 
+    /* -------------------------
+       背景画像
+    ------------------------- */
     function chooseBackgroundImage(items) {
       return items[0].imageURL.large;
     }
 
+    /* -------------------------
+       シリーズカードHTML
+    ------------------------- */
     function createSeriesCardHTML(name, items, category) {
       const bg = chooseBackgroundImage(items);
       const thumb = items[0].imageURL.small;
       const count = items.length;
-      const author = items[0].author?.name || "";
+      const author = items[0].author?.name || items[0].iteminfo?.actor?.[0]?.name || "";
 
       const url = (category === "photo" || category === "mixed")
         ? `series.html?author=${encodeURIComponent(author)}`
@@ -205,6 +235,9 @@
       `;
     }
 
+    /* -------------------------
+       シリーズカード描画
+    ------------------------- */
     function renderSeriesCards(items) {
       if (!items || items.length === 0) {
         document.getElementById("series-area").innerHTML = "";
@@ -225,6 +258,9 @@
       document.getElementById("series-area").innerHTML = html;
     }
 
+    /* -------------------------
+       一覧描画
+    ------------------------- */
     function renderSearchResults(items) {
       const list = document.getElementById("list");
       list.innerHTML = "";
@@ -249,6 +285,9 @@
       });
     }
 
+    /* -------------------------
+       検索処理
+    ------------------------- */
     function search(keyword) {
       document.getElementById("list").innerHTML = "読み込み中...";
 
