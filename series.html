@@ -30,16 +30,28 @@ async function loadSeries(id) {
       return;
     }
 
-// ② 最初の作品からシリーズ名を取得
-const firstItem = firstData.result.items[0];
-const seriesName =
-  firstItem.series_name ||
-  firstItem.iteminfo?.series?.[0]?.name;
+    // ② 全作品からシリーズ名候補を抽出（多数決）
+    const itemsForName = firstData.result.items;
 
-if (!seriesName) {
-  document.getElementById("book-list").innerText = "シリーズ名が取得できませんでした。";
-  return;
-}
+    const nameCandidates = itemsForName
+      .map(item =>
+        item.series_name ||
+        item.iteminfo?.series?.[0]?.name
+      )
+      .filter(Boolean);
+
+    // 多数決でシリーズ名を決定
+    const seriesName = nameCandidates
+      .sort((a, b) =>
+        nameCandidates.filter(v => v === a).length -
+        nameCandidates.filter(v => v === b).length
+      )
+      .pop();
+
+    if (!seriesName) {
+      document.getElementById("book-list").innerText = "シリーズ名が取得できませんでした。";
+      return;
+    }
 
     // ③ シリーズ名で再検索（本番のシリーズ一覧）
     const apiUrl = `https://dmm-api.nobidigi.workers.dev/?series_name=${encodeURIComponent(seriesName)}`;
