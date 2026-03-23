@@ -1,1 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>作品詳細</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+    img { max-width: 300px; border-radius: 8px; }
+    .title { font-size: 24px; font-weight: bold; margin-top: 10px; }
+    .info { margin-top: 10px; font-size: 16px; color: #555; }
+    .desc { margin-top: 15px; line-height: 1.7; }
+    .price { margin-top: 10px; font-size: 20px; color: #d00; }
+    .link {
+      margin-top: 20px;
+      display: inline-block;
+      font-size: 20px;
+      color: #0070f3;
+      padding: 10px 15px;
+      border: 1px solid #0070f3;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
 
+  <div id="content">読み込み中...</div>
+
+  <script>
+    // URL から cid を取得
+    const params = new URLSearchParams(location.search);
+    const cid = params.get("cid");
+
+    if (!cid) {
+      document.getElementById("content").textContent = "作品IDがありません。";
+    } else {
+      fetch(`https://dmm-api.nobidigi.workers.dev/?cid=${cid}`)
+        .then(res => res.json())
+        .then(data => {
+          const item = data.result.items[0];
+          const div = document.getElementById("content");
+
+          div.innerHTML = `
+            <img src="${item.imageURL.large}" alt="">
+            <div class="title">${item.title}</div>
+
+            <div class="info">
+              ${item.iteminfo?.author ? "作者: " + item.iteminfo.author[0].name : ""}
+              ${item.iteminfo?.series ? "<br>シリーズ: " + item.iteminfo.series[0].name : ""}
+            </div>
+
+            <div class="desc">
+              ${item.iteminfo?.volume || ""}
+            </div>
+
+            <a class="link" href="${item.affiliateURL}" target="_blank">DMMで作品を見る</a>
+          `;
+        });
+    }
+  </script>
+
+</body>
+</html>
