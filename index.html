@@ -1,68 +1,106 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>検索</title>
-<style>
-  body { font-family: sans-serif; padding: 20px; }
-  .item { margin-bottom: 20px; cursor: pointer; }
-  img { width: 120px; }
-  .credit { margin-top: 40px; font-size: 12px; color: #666; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>漫画・ラノベのシリーズ順まとめ｜最新刊・既刊を一発検索</title>
+  <meta name="description" content="漫画・ラノベのシリーズを最新刊から既刊まで一発検索。発売日・巻数・シリーズ一覧を自動で表示する便利な検索サイト。">
+
+  <!-- 構造化データ（JSON-LD） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "漫画・ラノベ シリーズ検索",
+    "url": "https://あなたのサイトURL/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://あなたのサイトURL/series.html?keyword={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <style>
+    body { font-family: sans-serif; margin: 20px; line-height: 1.7; }
+    h1 { font-size: 28px; margin-bottom: 10px; }
+    .search-box { margin: 20px 0; }
+    .popular-list a { display: inline-block; margin: 5px 10px 5px 0; }
+    .section { margin-top: 40px; }
+  </style>
 </head>
+
 <body>
 
-<h1>検索</h1>
+  <h1>漫画・ラノベのシリーズ順まとめサイト</h1>
+  <p>最新刊・既刊・シリーズ一覧を一発検索。漫画・ライトノベルの巻数・発売日を自動で取得できます。</p>
 
-<input id="keyword" type="text" placeholder="作品名を入力">
-<button onclick="search()">検索</button>
+  <!-- 検索フォーム -->
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="作品名・作者名で検索" style="width: 70%; padding: 10px;">
+    <button onclick="goSearch()" style="padding: 10px 20px;">検索</button>
+  </div>
 
-<div id="results"></div>
+  <script>
+    function goSearch() {
+      const kw = document.getElementById("searchInput").value.trim();
+      if (kw) {
+        location.href = `series.html?keyword=${encodeURIComponent(kw)}`;
+      }
+    }
+  </script>
 
-<!-- DMM クレジット（全ページ必須） -->
-<div class="credit">
-  Powered by <a href="https://affiliate.dmm.com/api/" target="_blank">DMM.com Webサービス</a>
-</div>
+  <!-- 人気シリーズ（内部リンク強化） -->
+  <div class="section">
+    <h2>人気シリーズ</h2>
+    <div class="popular-list">
+      <a href="series.html?keyword=鬼滅の刃">鬼滅の刃</a>
+      <a href="series.html?keyword=ブルーロック">ブルーロック</a>
+      <a href="series.html?keyword=葬送のフリーレン">葬送のフリーレン</a>
+      <a href="series.html?keyword=進撃の巨人">進撃の巨人</a>
+      <a href="series.html?keyword=チェンソーマン">チェンソーマン</a>
+      <a href="series.html?keyword=呪術廻戦">呪術廻戦</a>
+      <a href="series.html?keyword=ワンピース">ワンピース</a>
+      <a href="series.html?keyword=スパイファミリー">SPY×FAMILY</a>
+      <a href="series.html?keyword=ぼっち・ざ・ろっく">ぼっち・ざ・ろっく！</a>
+    </div>
+  </div>
 
-<script>
-async function search() {
-  const keyword = document.getElementById("keyword").value.trim();
-  if (!keyword) return;
+  <!-- 更新情報（静的でOK） -->
+  <div class="section">
+    <h2>更新情報</h2>
+    <ul>
+      <li>2026/03/24：トップページをリニューアルしました</li>
+      <li>2026/03/20：シリーズ検索機能を改善しました</li>
+      <li>2026/03/15：人気シリーズの内部リンクを追加しました</li>
+    </ul>
+  </div>
 
-  // ★ Cloudflare Worker の絶対 URL を使用
-  const url = `https://dmm-api.nobidigi.workers.dev/?mode=index&keyword=${encodeURIComponent(keyword)}`;
+  <!-- 使い方 -->
+  <div class="section">
+    <h2>このサイトの使い方</h2>
+    <ol>
+      <li>検索欄に作品名または作者名を入力します。</li>
+      <li>シリーズ一覧が自動で表示されます。</li>
+      <li>各巻の発売日・表紙・価格を確認できます。</li>
+      <li>気になる巻はそのまま購入ページへ移動できます。</li>
+    </ol>
+  </div>
 
-  let res;
-  try {
-    res = await fetch(url);
-  } catch (e) {
-    document.getElementById("results").innerHTML = "Worker に接続できません。";
-    return;
-  }
-
-  const data = await res.json();
-  const container = document.getElementById("results");
-  container.innerHTML = "";
-
-  if (!data.result || !data.result.items) {
-    container.innerHTML = "検索結果なし";
-    return;
-  }
-
-  data.result.items.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <img src="${item.imageURL.large}" />
-      <div>${item.title}</div>
-    `;
-    div.onclick = () => {
-      window.location.href = `series.html?keyword=${encodeURIComponent(keyword)}`;
-    };
-    container.appendChild(div);
-  });
-}
-</script>
-
+  <!-- カテゴリ一覧 -->
+  <div class="section">
+    <h2>カテゴリ一覧</h2>
+    <ul>
+      <li><a href="#">少年漫画</a></li>
+      <li><a href="#">青年漫画</a></li>
+      <li><a href="#">ライトノベル</a></li>
+      <li><a href="#">異世界ファンタジー</a></li>
+      <li><a href="#">恋愛・ラブコメ</a></li>
+      <li><a href="#">ホラー・サスペンス</a></li>
+    </ul>
+  </div>
+<footer style="margin-top: 60px; font-size: 14px; color: #666;">
+  本サイトは <a href="https://affiliate.dmm.com/" target="_blank">DMMアフィリエイト</a> のデータを利用しています。
+</footer>
 </body>
 </html>
