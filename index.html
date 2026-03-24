@@ -59,6 +59,55 @@
   }
 </style>
 
+    <style>
+    .ranking-section {
+      margin-top: 50px;
+    }
+
+    .ranking-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .rank-card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: #000;
+      display: block;
+    }
+
+    .rank-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+
+    .rank-number {
+      font-size: 22px;
+      font-weight: bold;
+      color: #ff5722;
+      margin-bottom: 10px;
+    }
+
+    .rank-img {
+      width: 100%;
+      height: 200px;
+      background: #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .rank-title {
+      font-size: 16px;
+      font-weight: bold;
+      line-height: 1.4;
+    }
+  </style>
+
   
 </head>
 
@@ -140,6 +189,91 @@
 
   </div>
 
+
+  <!-- ここからランキングカード -->
+  <div class="ranking-section">
+    <h2>人気ランキング（長期間上位）</h2>
+
+    <div class="ranking-grid">
+
+      <a class="rank-card" href="series.html?keyword=鬼滅の刃">
+        <div class="rank-number">1位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">鬼滅の刃</div>
+      </a>
+
+      <a class="rank-card" href="series.html?keyword=ブルーロック">
+        <div class="rank-number">2位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">ブルーロック</div>
+      </a>
+
+      <a class="rank-card" href="series.html?keyword=葬送のフリーレン">
+        <div class="rank-number">3位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">葬送のフリーレン</div>
+      </a>
+
+      <a class="rank-card" href="series.html?keyword=進撃の巨人">
+        <div class="rank-number">4位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">進撃の巨人</div>
+      </a>
+
+      <a class="rank-card" href="series.html?keyword=チェンソーマン">
+        <div class="rank-number">5位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">チェンソーマン</div>
+      </a>
+
+      <a class="rank-card" href="series.html?keyword=呪術廻戦">
+        <div class="rank-number">6位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">呪術廻戦</div>
+      </a>
+
+      <a class="rank-card" href="series.html?keyword=ワンピース">
+        <div class="rank-number">7位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">ワンピース</div>
+      </a>
+
+      <a class="rank-card" href="series.html?keyword=SPY×FAMILY">
+        <div class="rank-number">8位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">SPY×FAMILY</div>
+      </a>
+
+      <a class="rank-card" href="series.html?keyword=ぼっち・ざ・ろっく">
+        <div class="rank-number">9位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">ぼっち・ざ・ろっく！</div>
+      </a>
+
+      <a class="rank-card" href="series.html?keyword=転生したらスライムだった件">
+        <div class="rank-number">10位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">転生したらスライムだった件</div>
+      </a>
+
+      <a class="rank-card" href="series.html?keyword=Re:ゼロから始める異世界生活">
+        <div class="rank-number">11位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">Re:ゼロから始める異世界生活</div>
+      </a>
+
+      <a class="rank-card" href="series.html?keyword=無職転生">
+        <div class="rank-number">12位</div>
+        <div class="rank-img"></div>
+        <div class="rank-title">無職転生</div>
+      </a>
+
+    </div>
+  </div>
+  <!-- ランキングカードここまで -->
+
+
+  
   <!-- 更新情報（静的でOK） -->
   <div class="section">
     <h2>更新情報</h2>
